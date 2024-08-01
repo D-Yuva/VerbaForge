@@ -1,6 +1,8 @@
+import subprocess
+import shutil
 from flask import Flask, request, jsonify
 import re
-from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api import YouTubeTranscriptApi, NoTranscriptFound
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from pytube import YouTube
@@ -13,9 +15,13 @@ import google.api_core.exceptions
 app = Flask(__name__)
 
 # Set your Google API Key here
-GOOGLE_API_KEY = 'AIzaSyBPpShSmXuu4sfmkD8PjCaEN-UrQ59G4SI'
+GOOGLE_API_KEY = 'AIzaSyBHhq8EjXKqTXXrNXoCZ0m4Mpi1iXbAkTs'
 os.environ['GOOGLE_API_KEY'] = GOOGLE_API_KEY
 genai.configure(api_key=GOOGLE_API_KEY)
+
+# Check if ffmpeg is installed
+def is_ffmpeg_installed():
+    return shutil.which("ffmpeg") is not None
 
 # Extract video ID from YouTube URL
 def extract_video_id(url):
@@ -25,13 +31,31 @@ def extract_video_id(url):
 
 # Function to download YouTube video using yt-dlp
 def download_youtube_video(yt_url, download_path='./'):
+    if not is_ffmpeg_installed():
+        raise EnvironmentError("ffmpeg is not installed. Please install ffmpeg to proceed.")
+
     ydl_opts = {
         'format': 'best',
         'outtmpl': os.path.join(download_path, '%(title)s.%(ext)s'),
     }
+    
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        info_dict = ydl.extract_info(yt_url, download=True)
-        file_path = ydl.prepare_filename(info_dict)
+        try:
+            info_dict = ydl.extract_info(yt_url, download=True)
+            file_path = ydl.prepare_filename(info_dict)
+        except youtube_dl.utils.DownloadError as e:
+            if 'Requested format is not available' in str(e):
+                # List available formats
+                info_dict = ydl.extract_info(yt_url, download=False)
+                formats = info_dict.get('formats', [info_dict])
+                available_formats = [f['format_id'] for f in formats]
+                # Update ydl_opts with an available format
+                ydl_opts['format'] = available_formats[0]
+                with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                    info_dict = ydl.extract_info(yt_url, download=True)
+                    file_path = ydl.prepare_filename(info_dict)
+            else:
+                raise e
     return file_path
 
 @app.route('/process_video', methods=['POST'])
@@ -46,7 +70,7 @@ def process_video():
         video_id = extract_video_id(url)
 
         # Fetch video title using YouTube Data API
-        youtube = build('youtube', 'v3', developerKey=GOOGLE_API_KEY)
+        youtube = build('youtube', 'v3', developerKey='AIzaSyBPpShSmXuu4sfmkD8PjCaEN-UrQ59G4SI')
         video_response = youtube.videos().list(
             part='snippet',
             id=video_id
@@ -115,7 +139,7 @@ def process_video():
             if not response_emotion:
                 return jsonify({"error": "Failed to get a response after multiple attempts."}), 500
 
-        prompt_script = f"Generate a YouTube script for another creator that is similar in content or creates a new contemt with timestamps, including emotions and background activities. Generate script based on {specific_input}. Generate script starting from 0:00 and end at {script_time}.00, in the script make sure {cultural_reference} movie reference, {cultural_reference} meme reference, few {cultural_reference} words in between, make the script sound very {cultural_reference} and anything related to {cultural_reference} must be added to the script. Finally, suggest similar contents on the internet."
+        prompt_script = f"Generate a YouTube script for another creator that is similar in content or creates a new content with timestamps, including emotions and background activities. Generate script based on {specific_input}. Generate script starting from 0:00 and end at {script_time}.00, in the script make sure {cultural_reference} movie reference, {cultural_reference} meme reference, few {cultural_reference} words in between, make the script sound very {cultural_reference} and anything related to {cultural_reference} must be added to the script. Finally, suggest similar contents on the internet."
 
         retry_count = 0
         response_script = None

@@ -2576,7 +2576,7 @@ Some extractors accept additional arguments which can be passed using
 \f[C]ARGS\f[R] is a \f[C];\f[R] (semicolon) separated string of
 \f[C]ARG=VAL1,VAL2\f[R].
 E.g.
-\f[C]--extractor-args \[dq]youtube:player-client=android_embedded,web;formats=incomplete\[dq] --extractor-args \[dq]funimation:version=uncut\[dq]\f[R]
+\f[C]--extractor-args \[dq]youtube:player-client=mediaconnect,web;formats=incomplete\[dq] --extractor-args \[dq]funimation:version=uncut\[dq]\f[R]
 .PP
 Note: In CLI, \f[C]ARG\f[R] can use \f[C]-\f[R] instead of \f[C]_\f[R];
 e.g.
@@ -2602,17 +2602,18 @@ respectively
 .IP \[bu] 2
 \f[C]player_client\f[R]: Clients to extract video data from.
 The main clients are \f[C]web\f[R], \f[C]ios\f[R] and \f[C]android\f[R],
-with variants \f[C]_music\f[R], \f[C]_embedded\f[R],
-\f[C]_embedscreen\f[R], \f[C]_creator\f[R] (e.g.
-\f[C]web_embedded\f[R]); and \f[C]mediaconnect\f[R], \f[C]mweb\f[R],
-\f[C]mweb_embedscreen\f[R] and \f[C]tv_embedded\f[R] (agegate bypass)
-with no variants.
-By default, \f[C]ios,web\f[R] is used, but \f[C]tv_embedded\f[R] and
-\f[C]creator\f[R] variants are added as required for age-gated videos.
+with variants \f[C]_music\f[R] and \f[C]_creator\f[R] (e.g.
+\f[C]ios_creator\f[R]); and \f[C]mediaconnect\f[R], \f[C]mweb\f[R],
+\f[C]android_producer\f[R], \f[C]android_testsuite\f[R],
+\f[C]android_vr\f[R], \f[C]web_safari\f[R], \f[C]web_embedded\f[R],
+\f[C]tv\f[R] and \f[C]tv_embedded\f[R] with no variants.
+By default, \f[C]ios,tv\f[R] is used, but \f[C]tv_embedded\f[R],
+\f[C]web_creator\f[R] and \f[C]mediaconnect\f[R] are added as required
+for age-gated videos.
 Similarly, the music variants are added for \f[C]music.youtube.com\f[R]
 urls.
-The \f[C]android\f[R] clients will always be given lowest priority since
-their formats are broken.
+Most \f[C]android\f[R] clients will be given lowest priority since their
+formats are broken.
 You can use \f[C]all\f[R] to use all the clients, and \f[C]default\f[R]
 for the default clients.
 .IP \[bu] 2
@@ -2655,7 +2656,8 @@ requests; e.g.
 \f[C]studio.youtube.com\f[R], \f[C]youtubei.googleapis.com\f[R].
 Note that cookies exported from one subdomain will not work on others
 .IP \[bu] 2
-\f[C]innertube_key\f[R]: Innertube API key to use for all API requests
+\f[C]innertube_key\f[R]: Innertube API key to use for all API requests.
+By default, no API key is used
 .IP \[bu] 2
 \f[C]raise_incomplete_data\f[R]: \f[C]Incomplete Data Received\f[R]
 raises an error instead of reporting a warning

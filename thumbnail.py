@@ -8,12 +8,10 @@ from diffusers import StableDiffusionPipeline
 import torch
 import matplotlib.pyplot as plt
 from pytube import YouTube
+from diffusers import DiffusionPipeline
+import torch
 
 from app import GOOGLE_API_KEY,extract_video_id
-
-url = input("Enter YouTube link: ")
-video_id = extract_video_id(url)
-script = input("Enter the Script")
 
 genai.configure(api_key=GOOGLE_API_KEY)
 
@@ -58,23 +56,45 @@ def generate_from_thumb(thumbnail_name,script):
     model = genai.GenerativeModel(model_name="gemini-1.5-pro-latest")
      
     # create prompts- one for text gen
-    text_prompt = f"""Please generate a thumbnail image for a video I'm making that visually combines the essence of the provided image and 
-    the content of the provided script. The thumbnail should retain the overall aesthetic and style of the original image 
-    while incorporating visual elements that represent the key points of the script.\nHere is the script for the video:\n{script}"""
+    text_prompt = f"""DExplain the given Thumbnail. Then describe a new thumbnail for me, that is inspired from the thumbnail and is revelant 
+    to my script.Point out the similarities between my thumbnail and the given one's Here is the script\n{script}"""
+
+    #also create a prompt for image gen
+    image_prompt = f"""Give me just one prompt for an AI so that I can make an image similar to the image and is suitable for my script.
+    Here's the script \n{script}"""
 
     # Prompt the model with text and the previously uploaded image.
     text_response = model.generate_content([thumb, text_prompt])
+    image_response = model.generate_content([thumb,image_prompt])
     
     # markdown does not work in vscode and works only n jupter format
     # display(Markdown(">" + response.text))
-    return text_response.text
+    return text_response.text, image_response.text
 
+def generate_image(image_prompt):
+    # Load the pipeline
+    pipeline = DiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16)
 
+    # Move the pipeline to GPU
+    pipeline.to("cuda")
 
-def compile():
+    # Generate an image
+    result = pipeline(image_prompt).images[0]
+
+    # Save or display the result
+    result.save("output_image.png")
+
+def main():
+    url = input("Enter YouTube link: ")
+    video_id = extract_video_id(url)
+    script = input("Enter the Script")
     video_title = get_video_title(video_id)
     save_thumbnail(url,video_title)
-    response = generate_from_thumb(video_title,script)
-    print("\n",response)
+    text,image = generate_from_thumb(video_title,script)
 
-compile()
+    print("\n",text)
+    print("\nHere's a prompt for generating your thumbnail\n",image)
+
+    #generate_image(image);
+
+main()

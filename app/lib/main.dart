@@ -1,191 +1,226 @@
 import 'package:flutter/material.dart';
-import 'ScriptGeneratorScreen.dart';
 import 'package:provider/provider.dart';
+
+import 'ScriptGeneratorScreen.dart';
 
 void main() {
   runApp(MyApp());
 }
 
-
-
-// User model
-class User {
-  final String username;
-  final String password;
-
-  User({required this.username, required this.password});
-}
-
-// Authentication provider
-class AuthProvider with ChangeNotifier {
-  User? _user;
-
-  User? get user => _user;
-
-  bool login(String username, String password) {
-    // Dummy login logic
-    if (username == 'test' && password == 'password') {
-      _user = User(username: username, password: password);
-      notifyListeners();
-      return true;
-    }
-    return false;
-  }
-
-  bool register(String username, String password) {
-    // Dummy registration logic
-    if (username.isNotEmpty && password.isNotEmpty) {
-      _user = User(username: username, password: password);
-      notifyListeners();
-      return true;
-    }
-    return false;
-  }
-
-  void logout() {
-    _user = null;
-    notifyListeners();
-  }
-}
-
-
-
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => AuthProvider(),
-      child: MaterialApp(
-        title: 'Flutter Login/Register',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: AuthScreen(),
+    return MaterialApp(
+      title: 'Flutter Sign Up/Login',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
+      home: LoginPage(registeredEmail: 'Email', registeredPassword: 'Password',),
     );
   }
 }
+class LoginPage extends StatelessWidget {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
-class AuthScreen extends StatefulWidget {
+  final String registeredEmail;
+  final String registeredPassword;
+
+  LoginPage({required this.registeredEmail, required this.registeredPassword});
+
   @override
-  _AuthScreenState createState() => _AuthScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body:  Column(
+        crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
+        children: [
+          // RichText widget to show different font sizes for text
+          Padding(
+            padding: const EdgeInsets.only(top: 60.0), // Adjust this value as needed
+            child:RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'ScriptGen\n\n',
+                    style: TextStyle(
+                      fontSize: 26.0, // Smaller font size for "AI Powered"
+                      fontWeight: FontWeight.normal,
+                      color: Colors.black,
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'Login to your\nAccount',
+                    style: TextStyle(
+                      fontSize: 44.0, // Larger font size for "ScriptGen"
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 70.0),
+          TextField(
+            controller: emailController,
+            decoration: InputDecoration(
+                prefixIcon: Icon(Icons.person), // Lock icon for password
+
+                labelText: 'Email'),
+          ),
+          TextField(
+            controller: passwordController,
+            obscureText: true,
+            decoration: InputDecoration(
+                prefixIcon: Icon(Icons.lock), // Lock icon for password
+
+                labelText: 'Password'),
+          ),
+          SizedBox(height: 70),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white, backgroundColor: Colors.indigoAccent,
+              padding: EdgeInsets.symmetric(horizontal: 120.0, vertical: 15.0),
+              textStyle: TextStyle(fontSize: 18.0),
+            ),
+            onPressed: () {
+              String email = emailController.text;
+              String password = passwordController.text;
+
+              if (email == registeredEmail && password == registeredPassword) {
+                // Successful login, navigate to HomePage
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomePage()),
+                );
+              } else {
+                // Show error message and option to go back to Sign Up Page
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Invalid email or password')),
+                );
+              }
+            },
+            child: Text('Login'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => SignUpPage()),
+              );
+            },
+            child: Text('Do not have an account? Sign up'),
+          ),
+        ],
+      ),
+    );
+
+  }
 }
+class SignUpPage extends StatelessWidget {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
-class _AuthScreenState extends State<AuthScreen> {
-  final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _isLogin = true;
-  String _errorMessage = '';
-
-  void _toggleMode() {
-    setState(() {
-      _isLogin = !_isLogin;
-      _errorMessage = '';
-    });
+  bool _validateEmail(String email) {
+    final emailPattern = RegExp(r'^[a-zA-Z0-9._%+-]+@scriptgen\.com$');
+    return emailPattern.hasMatch(email);
   }
 
-  void _submit() {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final username = _usernameController.text;
-    final password = _passwordController.text;
-    bool success;
-
-    if (_isLogin) {
-      success = authProvider.login(username, password);
-    } else {
-      success = authProvider.register(username, password);
-    }
-
-    if (!success) {
-      setState(() {
-        _errorMessage = 'Invalid username or password';
-      });
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    }
+  bool _validatePassword(String password) {
+    final passwordPattern =
+    RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).+$');
+    return passwordPattern.hasMatch(password);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body:  Column(
+      body:  Column(
           crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
           children: [
-            // RichText widget to show different font sizes for text
-            Padding(
-              padding: const EdgeInsets.only(top: 60.0), // Adjust this value as needed
-              child:RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'ScriptGen\n\n',
-                      style: TextStyle(
-                        fontSize: 26.0, // Smaller font size for "AI Powered"
-                        fontWeight: FontWeight.normal,
-                        color: Colors.black,
-                      ),
-                    ),
-                    TextSpan(
-                      text: 'Sign in to your\nAccount',
-                      style: TextStyle(
-                        fontSize: 44.0, // Larger font size for "ScriptGen"
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
+      // RichText widget to show different font sizes for text
+      Padding(
+      padding: const EdgeInsets.only(top: 60.0), // Adjust this value as needed
+      child:RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: 'ScriptGen\n\n',
+              style: TextStyle(
+                fontSize: 26.0, // Smaller font size for "AI Powered"
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
               ),
             ),
+            TextSpan(
+              text: 'Sign in to your\nAccount',
+              style: TextStyle(
+                fontSize: 44.0, // Larger font size for "ScriptGen"
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
 
+    SizedBox(height: 70.0),
 
-            SizedBox(height: 70),
-
-            TextField(
-              controller: _usernameController,
+      TextField(
+              controller: emailController,
               decoration: InputDecoration(
                   prefixIcon: Icon(Icons.person), // Icon for username
 
-                  labelText: 'Username'),
+                  labelText: 'Email'),
 
-            ),
+      ),
             TextField(
-              controller: _passwordController,
+              controller: passwordController,
+              obscureText: true,
               decoration: InputDecoration(
-
                   prefixIcon: Icon(Icons.lock), // Lock icon for password
 
                   labelText: 'Password'),
-              obscureText: true,
             ),
-            SizedBox(height: 30),
-            if (_errorMessage.isNotEmpty)
-              Text(
-                _errorMessage,
-                style: TextStyle(color: Colors.red),
-              ),
-            SizedBox(height: 60),
+            SizedBox(height: 70),
             ElevatedButton(
-              onPressed: _submit,
-              child: Text(_isLogin ? 'Login' : 'Register'),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white, backgroundColor: Colors.indigoAccent,
                 padding: EdgeInsets.symmetric(horizontal: 120.0, vertical: 15.0),
                 textStyle: TextStyle(fontSize: 18.0),
               ),
+              onPressed: () {
+                String email = emailController.text;
+                String password = passwordController.text;
+
+                if (!_validateEmail(email)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Email must be in the format name@scriptgen.com')),
+                  );
+                } else if (!_validatePassword(password)) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Password must contain at least one uppercase letter, one lowercase letter, and one special character')),
+                  );
+                } else {
+                  // Navigate to Login Page after registration
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LoginPage(
+                        registeredEmail: email,
+                        registeredPassword: password,
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: Text('Register'),
             ),
-            TextButton(
-              onPressed: _toggleMode,
-              child: Text(_isLogin
-                  ? 'Don\'t have an account? Register'
-                  : 'Already have an account? Login'),
-            ),
-          ],
-        )
+    ]
+      ),
     );
 
 
@@ -193,10 +228,11 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+
+
+class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context);
     return Scaffold(
 
 
@@ -266,6 +302,9 @@ class HomeScreen extends StatelessWidget {
   }
 
 }
+
+
+
 class Generator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -278,5 +317,3 @@ class Generator extends StatelessWidget {
     );
   }
 }
-
-

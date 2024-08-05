@@ -42,7 +42,7 @@ class LoginPage extends StatelessWidget {
               text: TextSpan(
                 children: [
                   TextSpan(
-                    text: 'ScriptGen\n\n',
+                    text: 'VerbaGen\n\n',
                     style: TextStyle(
                       fontSize: 26.0, // Smaller font size for "AI Powered"
                       fontWeight: FontWeight.normal,
@@ -147,7 +147,7 @@ class SignUpPage extends StatelessWidget {
         text: TextSpan(
           children: [
             TextSpan(
-              text: 'ScriptGen\n\n',
+              text: 'VerbaGen\n\n',
               style: TextStyle(
                 fontSize: 26.0, // Smaller font size for "AI Powered"
                 fontWeight: FontWeight.normal,
@@ -255,7 +255,7 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   TextSpan(
-                    text: 'ScriptGen',
+                    text: 'VerbaGen',
                     style: TextStyle(
                       fontSize: 54.0, // Larger font size for "ScriptGen"
                       fontWeight: FontWeight.bold,

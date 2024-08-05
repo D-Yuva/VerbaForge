@@ -80,7 +80,7 @@ class LoginPage extends StatelessWidget {
           SizedBox(height: 70),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              foregroundColor: Colors.white, backgroundColor: Colors.indigoAccent,
+              foregroundColor: Colors.white, backgroundColor: Colors.purple,
               padding: EdgeInsets.symmetric(horizontal: 120.0, vertical: 15.0),
               textStyle: TextStyle(fontSize: 18.0),
             ),
@@ -188,7 +188,7 @@ class SignUpPage extends StatelessWidget {
             SizedBox(height: 70),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white, backgroundColor: Colors.indigoAccent,
+                foregroundColor: Colors.white, backgroundColor: Colors.purple,
                 padding: EdgeInsets.symmetric(horizontal: 120.0, vertical: 15.0),
                 textStyle: TextStyle(fontSize: 18.0),
               ),
@@ -288,7 +288,7 @@ class HomePage extends StatelessWidget {
             },
             child: Text('Get Started'),
             style: ElevatedButton.styleFrom(
-              foregroundColor: Colors.white, backgroundColor: Colors.indigoAccent,
+              foregroundColor: Colors.white, backgroundColor: Colors.purple,
               padding: EdgeInsets.symmetric(horizontal: 120.0, vertical: 15.0),
               textStyle: TextStyle(fontSize: 18.0),
             ),

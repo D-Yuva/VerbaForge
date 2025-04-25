@@ -14,7 +14,7 @@ import google.api_core.exceptions
 
 app = Flask(__name__)
 
-GOOGLE_API_KEY = 'AIzaSyBHhq8EjXKqTXXrNXoCZ0m4Mpi1iXbAkTs'
+GOOGLE_API_KEY = 'GOOGLE_API'
 os.environ['GOOGLE_API_KEY'] = GOOGLE_API_KEY
 genai.configure(api_key=GOOGLE_API_KEY)
 
